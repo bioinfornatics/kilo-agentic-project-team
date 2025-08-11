@@ -1,0 +1,3 @@
+# Tech
+
+Short authoritative notes.

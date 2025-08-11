@@ -1,0 +1,4 @@
+id,title,status,owner,mode
+1,Initialize Kilo Code starter,done,orchestrator,orchestrator
+2,Enable indexing/Qdrant,pending,sre,sre
+3,Define PRD and AC,in_progress,product,product-manager

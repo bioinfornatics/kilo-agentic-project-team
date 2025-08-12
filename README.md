@@ -14,24 +14,39 @@ A preconfigured starter for **Kilo Code** to speed up web projects with:
 
 ---
 
-## 1) Quick start
+## Quick Start
 
 ### Prerequisites
 - **VS Code** with the **Kilo Code** extension installed
-- **Node.js ≥ 20** (for scripts/tests you add)
-- **Docker** (to run local **Qdrant** for indexing)
+- **Python ≥ 3.10** (for any scripts/tests you add)
+- **Docker** or **Podman** (to run local services like Qdrant and Penpot)
 
 ### Steps
-1. Extract the archive at the **root** of your repository.
-2. Open the folder in VS Code with **Kilo Code** enabled.
-3. Run the workflows:
-   - `/onboarding-web.md`
-   - `/enable-indexing.md` (choose embeddings provider, set Qdrant URL, save)
-   - `/update-memory-bank.md` (refresh short project summaries)
-4. Try a quick task to validate mode switching (e.g., “write an E2E test for login”) — the **Orchestrator** should switch to **`qa-engineer`** automatically.
 
----
+1. **Integrate the starter into your project:**
+   - **Option 1:** Rename the `my-project` folder to your project name and work directly inside it.
+   - **Option 2:** Copy the following into your existing project:
+     - `.kilocode`
+     - `.kilocodemodes`
+     - `projects/`
+   
+2. **Launch preconfigured services** (Penpot & Qdrant):
+   - Navigate to `penpot/` and run:
+     ```bash
+     podman-compose up -d
+     ```
+   - Navigate to `qdrant/` and run:
+     ```bash
+     podman-compose up -d
+     ```
 
-## 2) Directory layout (high‑level)
+3. **Open the project in VS Code** with **Kilo Code** enabled.
 
+4. **Run the workflows**:
+   - `my-project/onboarding-web.md`
+   - `my-project/enable-indexing.md`
+   - `my-project/update-memory-bank.md`
 
+5. **Test your setup**:
+   - Try a quick task like *"Write an E2E test for login"*.
+   - The orchestrator should switch to the `qa-engineer` mode automatically.

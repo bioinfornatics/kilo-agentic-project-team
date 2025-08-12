@@ -1,0 +1,7 @@
+:443 {
+  tls internal
+  reverse_proxy qdrant:6333
+}
+:80 {
+  redir https://{host}{uri}
+}

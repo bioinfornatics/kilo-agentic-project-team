@@ -1,0 +1,68 @@
+version: "3.9"
+services:
+  qdrant:
+    image: docker.io/qdrant/qdrant:latest
+    container_name: qdrant
+    ports:
+      - "6333:6333"          # REST + /metrics
+    volumes:
+      - ./qdrant_storage:/qdrant/storage:Z,U
+      - ./qdrant_snapshots:/qdrant/snapshots:Z,U
+      # - ./production.yaml:/qdrant/config/production.yaml:Z   # si tuning
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:6333/metrics"]
+      interval: 10s
+      timeout: 2s
+      retries: 10
+    restart: unless-stopped
+
+  # Reverse proxy + TLS auto (optionnel, si public)
+  caddy:
+    image: docker.io/caddy:2
+    container_name: caddy
+    ports:
+      - "6380:80"
+      - "6343:443"
+    environment:
+      - QDRANT_UPSTREAM=http://qdrant:6333
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:Z,U
+      - ./caddy_data:/data:Z,U
+      - ./caddy_config:/config:Z,U
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+
+  # Prometheus (scrape /metrics de Qdrant)
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:Z
+      - ./prometheus_data:/prometheus:Z,U
+    ports:
+      - "6390:9090"
+    restart: unless-stopped
+    depends_on: [qdrant]
+
+  # Grafana (dashboards Qdrant)
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    volumes:
+      - ./grafana_data:/var/lib/grafana:Z,U
+    ports:
+      - "6300:3000"
+    restart: unless-stopped
+    depends_on: [prometheus]
+
+  snapshotter:
+    image: docker.io/curlimages/curl:8.15.0
+    depends_on: [qdrant]
+    entrypoint: ["/bin/sh","-c"]
+    command:
+      - |
+        while true; do
+          # crée un snapshot de toutes les collections
+          curl -s -X POST http://qdrant:6333/snapshots -H 'Content-Type: application/json' -d '{}'
+          # TODO: récupérer le nom du snapshot et le copier vers S3/MinIO
+          sleep 86400
+        done
